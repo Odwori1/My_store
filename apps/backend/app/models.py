@@ -1,5 +1,5 @@
 # ~/My_store/apps/backend/app/models.py
-from sqlalchemy import Column, Integer, String, Boolean, Numeric
+from sqlalchemy import Column, Integer, String, Boolean, Float, Numeric
 from .database import Base
 
 class User(Base):
@@ -19,3 +19,8 @@ class Product(Base):
     quantity = Column(Integer, default=0)
     reorder_level = Column(Integer, default=0)
 
+class TestTable(Base):
+    __tablename__ = "test_table"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
