@@ -1,20 +1,18 @@
-# ~/My_store/apps/backend/app/main.py
 from fastapi import FastAPI
-from app.database import engine, Base
-from app.routers import user  # new user router
-# from app.api import auth, products  # uncomment when ready
+from app.routers import user, product
+from app.db import engine, Base
 
-# Create DB tables
+# Create tables on startup (if they don't exist)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="My Store API")
 
-# Include routers
-app.include_router(user.router, prefix="/users", tags=["users"])
-# app.include_router(auth.router, prefix="/auth", tags=["auth"])
-# app.include_router(products.router, prefix="/products", tags=["products"])
+# Include routers with proper prefixes
+app.include_router(user.router, prefix="/users", tags=["Users"])
+app.include_router(product.router, prefix="/products", tags=["Products"])
 
+# Optional root endpoint
 @app.get("/")
-def read_root():
-    return {"message": "Welcome to My_store Backend API"}
+def root():
+    return {"message": "Welcome to My Store API"}
 

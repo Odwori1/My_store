@@ -1,26 +1,25 @@
-# ~/My_store/apps/backend/app/schemas/user.py
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
+from pydantic import ConfigDict
 
 class UserBase(BaseModel):
-    email: EmailStr
-    name: Optional[str] = None  # Keep your existing field
-    full_name: Optional[str] = None  # New field from new schema
+    name: str
+    email: str
 
 class UserCreate(UserBase):
-    password: str  # New required field for creation
+    password: str
 
-class UserUpdate(UserBase):
-    password: Optional[str] = None
-    is_active: Optional[bool] = None  # Keep your existing field
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    is_active: Optional[bool] = None
 
-class UserInDBBase(UserBase):
+class User(UserBase):
     id: int
-    is_active: bool  # Keep your existing field
+    is_active: bool
 
-    class Config:
-        orm_mode = True  # Using Pydantic v1 style for compatibility
+    model_config = ConfigDict(from_attributes=True)
 
-class User(UserInDBBase):
-    pass
+    '''class Config:
+        orm_mode = True'''
 

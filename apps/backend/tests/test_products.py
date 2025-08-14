@@ -1,27 +1,11 @@
-# ~/My_store/apps/backend/tests/test_main.py
-import pytest
 import uuid
-from fastapi.testclient import TestClient
-from app.main import app
-from app.db import Base, engine, SessionLocal
+from tests.conftest import client
 
-client = TestClient(app)
+def unique_product_name(base="Product"):
+    return f"{base}_{uuid.uuid4().hex}"
 
-@pytest.fixture(autouse=True)
-def setup_and_teardown():
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
-
-# ------------------
-# Product Tests
-# ------------------
-def unique_product_name(base_name="Product"):
-    return f"{base_name}_{uuid.uuid4().hex}"
-
-def test_create_product():
-    name = unique_product_name("Laptop")
+def test_create_product(client):
+    name = unique_product_name()
     response = client.post("/products/", json={
         "name": name,
         "category": "Electronics",
@@ -35,13 +19,13 @@ def test_create_product():
     assert data["name"] == name
     assert data["category"] == "Electronics"
 
-def test_get_products():
+def test_read_products(client):
     response = client.get("/products/")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
-def test_update_product():
-    name = unique_product_name("Phone")
+def test_update_product(client):
+    name = unique_product_name()
     res = client.post("/products/", json={
         "name": name,
         "category": "Electronics",
@@ -50,21 +34,14 @@ def test_update_product():
         "quantity": 15
     })
     product_id = res.json()["id"]
-
-    response = client.put(f"/products/{product_id}", json={
-        "name": name + "_Updated",
-        "sale_price": 450.0,
-        "category": "Electronics",
-        "cost_price": 300.0,
-        "quantity": 15
-    })
+    response = client.put(f"/products/{product_id}", json={"name": name+"_Updated", "sale_price": 450.0})
     assert response.status_code == 200
     data = response.json()
-    assert data["name"] == name + "_Updated"
+    assert data["name"] == name+"_Updated"
     assert float(data["sale_price"]) == 450.0
 
-def test_delete_product():
-    name = unique_product_name("Tablet")
+def test_delete_product(client):
+    name = unique_product_name()
     res = client.post("/products/", json={
         "name": name,
         "category": "Electronics",
@@ -73,7 +50,6 @@ def test_delete_product():
         "quantity": 5
     })
     product_id = res.json()["id"]
-
     response = client.delete(f"/products/{product_id}")
     assert response.status_code == 200
     assert response.json()["detail"] == "Product deleted"
